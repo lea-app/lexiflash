@@ -1,0 +1,587 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
+
+@font-face {
+    font-family: "Andika";
+    src: url("polices/Andika-Regular.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "BelleAllure";
+    src: url("polices/BelleAllureCE-Gros.otf") format("opentype");
+}
+
+/* ==============================
+   BASE
+   ============================== */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 12px;
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    overflow: hidden;
+
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+}
+
+button {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 8px;
+
+    font-size: 17px;
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+
+/* ==============================
+   APPLICATION
+   ============================== */
+
+.application {
+    width: min(96%, 1000px);
+    max-width: 1000px;
+    height: calc(100vh - 24px);
+
+    margin: 0 auto;
+    padding: 16px;
+
+    display: grid;
+    grid-template-rows: auto auto minmax(90px, auto) minmax(0, 1fr);
+    gap: 10px;
+
+    overflow: hidden;
+
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+    text-align: center;
+}
+
+
+/* ==============================
+   EN-TÊTE ET IMPORTS
+   ============================== */
+
+.entete-application {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+
+    margin-bottom: 10px;
+}
+
+.entete-application h1 {
+    margin: 0;
+
+    color: green;
+    font-size: 30px;
+    line-height: 1;
+}
+
+.actions-import {
+    display: flex;
+    gap: 8px;
+}
+
+.actions-import button {
+    padding: 8px 12px;
+    border-radius: 6px;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+#choisirCorpus {
+    background-color: green;
+    color: white;
+}
+
+#fichierCorpus,
+#fichierPdf {
+    display: none;
+}
+
+
+/* ==============================
+   SÉLECTION ET OPTIONS
+   ============================== */
+
+.selection-corpus {
+    margin-bottom: 12px;
+}
+
+#nomCorpus {
+    margin: 0 0 8px;
+
+    color: #666;
+    font-size: 13px;
+    display: none;
+}
+
+.options-lecture {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    font-size: 13px;
+}
+
+.option-melange {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+#modeLecture {
+    min-width: 190px;
+    height: 30px;
+
+    font-size: 13px;
+}
+
+
+/* ==============================
+   BIBLIOTHÈQUE
+   ============================== */
+
+.bibliotheque {
+    min-height: 0;
+    max-height: 125px;
+    margin: 0;
+    padding-right: 4px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#listeCorpus {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+
+    margin: 0;
+}
+
+.ligne-corpus {
+    position: relative;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+
+    margin: 0;
+    overflow: hidden;
+
+    background-color: white;
+    border: 1px solid #d8d8d8;
+    border-radius: 10px;
+
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+}
+
+.ligne-corpus:hover {
+    border-color: #aaaaaa;
+    box-shadow: 0 3px 9px rgba(0, 0, 0, 0.08);
+}
+
+.ligne-corpus.corpus-actif {
+    border: 2px solid green;
+}
+
+.bouton-corpus {
+    width: 100%;
+    min-width: 0;
+    padding: 9px 50px 9px 12px;
+
+    display: grid;
+    grid-template-columns: auto auto auto;
+    align-content: center;
+    justify-content: start;
+    column-gap: 14px;
+    row-gap: 4px;
+
+    background-color: white;
+    border-radius: 0;
+    text-align: left;
+}
+
+.bouton-corpus:hover {
+    background-color: #f7faf7;
+}
+
+.titre-corpus {
+    grid-column: 1 / -1;
+    max-width: 100%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 0.95rem;
+    font-weight: bold;
+}
+
+.infos-corpus,
+.favoris-corpus,
+.masquage-corpus {
+    margin: 0;
+
+    color: #666;
+    font-size: 0.78rem;
+    font-weight: normal;
+}
+
+.favoris-corpus {
+    color: #665500;
+}
+
+.masquage-corpus {
+    color: #555;
+}
+
+.actions-corpus {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    transform: translateY(-50%);
+    padding: 0;
+
+    background: transparent;
+    border: none;
+}
+
+.renommer-corpus,
+.supprimer-corpus {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 5px;
+
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.renommer-corpus {
+    background-color: #e8e8e8;
+}
+
+.renommer-corpus:hover {
+    background-color: #dddddd;
+}
+
+.supprimer-corpus {
+    background-color: #f6eaea;
+    color: #9b1c1c;
+}
+
+.supprimer-corpus:hover {
+    background-color: #efdada;
+}
+
+
+/* ==============================
+   ZONE DE LECTURE
+   ============================== */
+
+.zone-lecture {
+    position: relative;
+    min-height: 0;
+    padding: 10px;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+
+    background-color: #f2f7f2;
+    border-radius: 12px;
+}
+
+.contenu-carte {
+    min-height: 0;
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+}
+
+#imageMot {
+    display: block;
+
+    width: min(700px, 92vw);
+    height: min(500px, 52vh);
+
+    object-fit: contain;
+    margin: 0 auto;
+
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+
+    cursor: pointer;
+}
+
+#imageMot[hidden] {
+    display: none;
+}
+
+#motAffiche {
+    width: 100%;
+    min-height: 52px;
+
+    margin: 0;
+    padding: 6px 12px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: white;
+    border: 2px solid #dddddd;
+    border-radius: 10px;
+
+    font-family: "Nunito", sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.1;
+
+    cursor: pointer;
+}
+
+#motAffiche.ecriture-capitales {
+    font-family: "Nunito", sans-serif;
+    font-weight: 700;
+}
+
+#motAffiche.ecriture-script {
+    font-family: "Andika", sans-serif;
+    font-weight: 400;
+}
+
+#motAffiche.ecriture-cursive {
+    font-family: "BelleAllure", cursive;
+    font-weight: 400;
+}
+
+#progression {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    z-index: 2;
+
+    margin: 0;
+
+    color: green;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.actions-carte,
+.navigation-carte {
+    flex-shrink: 0;
+
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.actions-carte {
+    margin-bottom: 4px;
+}
+
+.actions-carte button,
+.navigation-carte button {
+    padding: 8px 12px;
+
+    font-size: 13px;
+}
+
+#boutonFavori {
+    background-color: #eeeeee;
+}
+
+#boutonFavori.est-favori {
+    background-color: #fff3bf;
+}
+
+#boutonFavori:disabled {
+    opacity: 0.5;
+}
+
+#motSuivant {
+    background-color: #333;
+    color: white;
+}
+
+#motSuivant:disabled {
+    background-color: #aaaaaa;
+}
+
+
+/* ==============================
+   ÉCRANS ÉTROITS
+   ============================== */
+
+@media (max-width: 500px) {
+    #listeCorpus {
+        grid-template-columns: 1fr;
+    }
+
+    .ligne-corpus {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ==============================
+   ÉCRANS MOINS HAUTS
+   ============================== */
+
+@media (max-height: 800px) {
+    body {
+        padding: 8px;
+    }
+
+    .application {
+        height: calc(100vh - 16px);
+        padding: 12px;
+        gap: 7px;
+    }
+
+    .bibliotheque {
+        max-height: 105px;
+    }
+
+    #imageMot {
+        height: min(340px, 39vh);
+    }
+
+    #motAffiche {
+        min-height: 48px;
+        padding: 5px 12px;
+        font-size: 34px;
+    }
+
+    .actions-carte button,
+    .navigation-carte button {
+        padding: 6px 10px;
+    }
+
+    
+}
+
+/* ==============================
+   MODE PLEIN ÉCRAN
+   ============================== */
+
+:fullscreen .zone-lecture {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    width: 100vw;
+    height: 100vh;
+    padding: 18px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    overflow: hidden;
+
+    background-color: #f2f7f2;
+    border-radius: 0;
+}
+
+:fullscreen .contenu-carte {
+    min-height: 0;
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+:fullscreen #imageMot {
+    width: min(1100px, 88vw);
+    height: min(680px, calc(100vh - 210px));
+
+    min-height: 0;
+    flex: 1;
+
+    object-fit: contain;
+}
+
+:fullscreen #motAffiche {
+    min-height: 62px;
+    flex-shrink: 0;
+
+    font-size: 44px;
+}
+
+:fullscreen .actions-carte,
+:fullscreen .navigation-carte {
+    flex-shrink: 0;
+}
+
+:fullscreen #progression {
+    position: absolute;
+    top: 18px;
+    left: 20px;
+
+    font-size: 16px;
+}
+
+:-webkit-full-screen .zone-lecture {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    width: 100vw;
+    height: 100vh;
+    padding: 18px;
+
+    overflow: hidden;
+    border-radius: 0;
+}

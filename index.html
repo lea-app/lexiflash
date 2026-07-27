@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>LexiFlash</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css">
+
+</head>
+
+<body>
+
+    <main class="application">
+
+        <header class="entete-application">
+
+            <h1>LexiFlash</h1>
+
+            <div class="actions-import">
+
+                <input
+                    type="file"
+                    id="fichierCorpus"
+                    accept=".txt,text/plain"
+                    hidden>
+
+                <input
+                    type="file"
+                    id="fichierPdf"
+                    accept=".pdf,application/pdf"
+                    hidden>
+
+                <button id="choisirCorpus">
+                    Importer TXT
+                </button>
+
+                <button id="choisirPdf">
+                    Importer PDF
+                </button>
+
+            </div>
+
+        </header>
+
+        <section class="selection-corpus">
+
+            <p id="nomCorpus">
+                Aucun corpus sélectionné
+            </p>
+
+            <div class="options-lecture">
+
+                <label class="option-melange">
+
+                    <input
+                        type="checkbox"
+                        id="melanger"
+                        checked>
+
+                    Mélanger
+
+                </label>
+
+                <label for="modeLecture">
+                    Réviser :
+                </label>
+
+                <select id="modeLecture">
+
+                    <option value="toutes">
+                        Tout le corpus
+                    </option>
+
+                    <option value="favorisCorpus">
+                        Les favoris du corpus
+                    </option>
+
+                    <option value="favorisBibliotheque">
+                        Tous mes favoris
+                    </option>
+
+                    <option value="cartesMasquees">
+                        Les cartes masquées du corpus
+                    </option>
+
+                </select>
+
+                <label for="modeAffichage">
+                    Affichage :
+                </label>
+
+                <select id="modeAffichage">
+
+                    <option value="normal">
+                        Mot visible
+                    </option>
+
+                    <option value="revelation">
+                        Révélation progressive
+                    </option>
+
+                </select>
+
+                <select id="modeEcriture">
+
+                    <option value="capitales">
+                        Capitales
+                    </option>
+
+                    <option value="script">
+                        Script
+                    </option>
+
+                    <option value="cursive">
+                        Cursive
+                    </option>
+
+                </select>
+
+            </div>
+
+        </section>
+
+        <section
+            id="bibliotheque"
+            class="bibliotheque">
+
+            <div id="listeCorpus">
+
+                <p class="bibliotheque-vide">
+                    Aucun corpus importé
+                </p>
+
+            </div>
+
+        </section>
+
+        <section class="zone-lecture">
+
+            <div class="contenu-carte">
+
+                <img
+                    id="imageMot"
+                    alt=""
+                    hidden>
+
+                <div id="motAffiche">
+                    —
+                </div>
+
+            </div>
+
+            <p id="progression">
+                0 / 0
+            </p>
+
+            <div class="actions-carte">
+
+                <button
+                    id="boutonFavori"
+                    disabled>
+
+                    ☆ Ajouter aux favoris
+
+                </button>
+
+                <button
+                    id="boutonMasquer"
+                    disabled>
+
+                    🙈 Masquer cette carte
+
+                </button>
+
+            </div>
+
+            <div class="navigation-carte">
+
+                <button
+                    id="motPrecedent"
+                    disabled>
+
+                    ◀ Précédent
+
+                </button>
+
+                <button
+                    id="recommencer"
+                    disabled>
+
+                    ↺ Recommencer
+
+                </button>
+
+                <button
+                    id="motSuivant"
+                    disabled>
+
+                    Suivant ▶
+
+                </button>
+
+                <button id="pleinEcran">
+                    Plein écran
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <script
+        type="module"
+        src="app.js">
+    </script>
+
+</body>
+
+</html>
