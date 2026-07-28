@@ -213,8 +213,161 @@ function reunirFragmentsTexte(
         }
     );
 
+    /*
+     * Certains PDF laissent déborder dans une carte
+     * des lettres provenant de la carte voisine.
+     *
+     * Ces lettres apparaissent sous la forme
+     * d’une colonne verticale :
+     *
+     * P
+     * A
+     * R
+     * L
+     *
+     * On ne les retire que si :
+     * - chaque fragment contient une seule lettre ;
+     * - au moins trois lettres sont alignées ;
+     * - elles ont presque toutes la même hauteur ;
+     * - un véritable fragment de mot est présent.
+     */
+
+    const fragmentsDeMots =
+        fragments.filter(
+            function (fragment) {
+
+                const texteSansSeparateurs =
+                    fragment.texte.replace(
+                        /[^a-zà-ÿœæ]/gi,
+                        ""
+                    );
+
+                return texteSansSeparateurs.length
+                    > 1;
+
+            }
+        );
+
+    const fragmentsParasites =
+        new Set();
+
+    if (
+        fragmentsDeMots.length > 0
+    ) {
+
+        const hauteurMaximaleMot =
+            Math.max(
+                ...fragmentsDeMots.map(
+                    function (fragment) {
+
+                        return fragment.hauteur;
+
+                    }
+                )
+            );
+
+        const lettresIsolees =
+            fragments.filter(
+                function (fragment) {
+
+                    const texteSansSeparateurs =
+                        fragment.texte.replace(
+                            /[^a-zà-ÿœæ]/gi,
+                            ""
+                        );
+
+                    return texteSansSeparateurs.length
+                        === 1
+                        && fragment.hauteur
+                            < hauteurMaximaleMot * 0.85;
+
+                }
+            );
+
+        lettresIsolees.forEach(
+            function (lettreTestee) {
+
+                const lettresAlignees =
+                    lettresIsolees.filter(
+                        function (autreLettre) {
+
+                            const differenceHorizontale =
+                                Math.abs(
+                                    autreLettre.x
+                                    - lettreTestee.x
+                                );
+
+                            const differenceHauteur =
+                                Math.abs(
+                                    autreLettre.hauteur
+                                    - lettreTestee.hauteur
+                                );
+
+                            return differenceHorizontale
+                                <= 1.5
+                                && differenceHauteur
+                                    <= 1;
+
+                        }
+                    );
+
+                if (
+                    lettresAlignees.length >= 3
+                ) {
+
+                    const positionsVerticales =
+                        lettresAlignees.map(
+                            function (fragment) {
+
+                                return fragment.y;
+
+                            }
+                        );
+
+                    const hauteurDeLaColonne =
+                        Math.max(
+                            ...positionsVerticales
+                        )
+                        - Math.min(
+                            ...positionsVerticales
+                        );
+
+                    if (
+                        hauteurDeLaColonne > 15
+                    ) {
+
+                        lettresAlignees.forEach(
+                            function (fragment) {
+
+                                fragmentsParasites.add(
+                                    fragment
+                                );
+
+                            }
+                        );
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+    const fragmentsFiltres =
+        fragments.filter(
+            function (fragment) {
+
+                return !fragmentsParasites.has(
+                    fragment
+                );
+
+            }
+        );
+
     const textes =
-        fragments.map(
+        fragmentsFiltres.map(
             function (fragment) {
 
                 return fragment.texte;
@@ -236,7 +389,6 @@ function reunirFragmentsTexte(
         .toLocaleUpperCase("fr-FR");
 
 }
-
 
 async function extraireTextesDeLaPage(
     page,
@@ -425,6 +577,12 @@ async function extraireTextesDeLaPage(
                     ?? 0
                 );
 
+            const largeurTexte =
+                Math.abs(
+                    element.width
+                    ?? 0
+                );
+
             const estPetiteMention =
                 hauteurTexte
                 < hauteurZone * 0.04;
@@ -454,7 +612,16 @@ async function extraireTextesDeLaPage(
                     positionX,
 
                 y:
-                    positionY
+                    positionY,
+
+                largeur:
+                    largeurTexte,
+
+                hauteur:
+                    hauteurTexte,
+
+                positionDansLaZone:
+                    positionDansLaZone
 
             });
 
@@ -472,7 +639,6 @@ async function extraireTextesDeLaPage(
     );
 
 }
-
 // ==============================
 // DISPOSITION DES CARTES
 // ==============================
