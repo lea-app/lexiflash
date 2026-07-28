@@ -307,6 +307,25 @@ async function extraireTextesDeLaPage(
 
             }
 
+            /*
+             * Certaines ressources pédagogiques
+             * comportent cette mention en filigrane.
+             * Elle ne doit jamais devenir le texte
+             * d’une carte.
+             */
+
+            if (
+                texte
+                    .toLocaleLowerCase("fr-FR")
+                    .includes(
+                        "dessinemoiunehistoire.net"
+                    )
+            ) {
+
+                return;
+
+            }
+
             const positionX =
                 element.transform[4];
 
@@ -390,17 +409,29 @@ async function extraireTextesDeLaPage(
                 / hauteurZone;
 
             /*
-             * Comme dans l’ancien système,
-             * on ignore les petites mentions
-             * situées tout en bas.
+             * On ignore uniquement les petites
+             * mentions placées tout en bas.
              *
-             * La différence est que cette
-             * vérification est maintenant faite
-             * séparément dans chaque cellule.
+             * Les véritables légendes peuvent
+             * également être proches du bas,
+             * mais leur hauteur de texte est
+             * nettement plus importante.
              */
+
+            const hauteurTexte =
+                Math.abs(
+                    element.height
+                    ?? element.transform[3]
+                    ?? 0
+                );
+
+            const estPetiteMention =
+                hauteurTexte
+                < hauteurZone * 0.04;
 
             if (
                 positionDansLaZone < 0.12
+                && estPetiteMention
             ) {
 
                 return;
@@ -441,7 +472,6 @@ async function extraireTextesDeLaPage(
     );
 
 }
-
 
 // ==============================
 // DISPOSITION DES CARTES
@@ -717,6 +747,7 @@ export async function creerCorpusDepuisPdf(
                 disposition
             );
 
+
         cartesPdf.push(
             ...resultat.cartes
         );
@@ -749,6 +780,10 @@ export async function creerCorpusDepuisPdf(
 // SUPPRESSION DES RÉPÉTITIONS
 // ==============================
 
+// ==============================
+// SUPPRESSION DES RÉPÉTITIONS
+// ==============================
+
 function normaliserPourComparaison(
     texte
 ) {
@@ -769,6 +804,428 @@ function normaliserPourComparaison(
 }
 
 
+function normaliserSansEspaces(
+    texte
+) {
+
+    return normaliserPourComparaison(
+        texte
+    )
+        .replace(
+            /[^a-z0-9œæ]/g,
+            ""
+        );
+
+}
+
+
+function calculerDistanceLevenshtein(
+    texteA,
+    texteB
+) {
+
+    const longueurA =
+        texteA.length;
+
+    const longueurB =
+        texteB.length;
+
+    const distances =
+        Array.from(
+            {
+                length:
+                    longueurA + 1
+            },
+            function () {
+
+                return new Array(
+                    longueurB + 1
+                ).fill(0);
+
+            }
+        );
+
+    for (
+        let indexA = 0;
+        indexA <= longueurA;
+        indexA++
+    ) {
+
+        distances[indexA][0] =
+            indexA;
+
+    }
+
+    for (
+        let indexB = 0;
+        indexB <= longueurB;
+        indexB++
+    ) {
+
+        distances[0][indexB] =
+            indexB;
+
+    }
+
+    for (
+        let indexA = 1;
+        indexA <= longueurA;
+        indexA++
+    ) {
+
+        for (
+            let indexB = 1;
+            indexB <= longueurB;
+            indexB++
+        ) {
+
+            const cout =
+                texteA[indexA - 1]
+                === texteB[indexB - 1]
+                    ? 0
+                    : 1;
+
+            distances[indexA][indexB] =
+                Math.min(
+
+                    distances[indexA - 1][indexB]
+                    + 1,
+
+                    distances[indexA][indexB - 1]
+                    + 1,
+
+                    distances[indexA - 1][indexB - 1]
+                    + cout
+
+                );
+
+        }
+
+    }
+
+    return distances[
+        longueurA
+    ][
+        longueurB
+    ];
+
+}
+
+
+function textesPresqueIdentiques(
+    texteA,
+    texteB
+) {
+
+    const texteNormaliseA =
+        normaliserPourComparaison(
+            texteA
+        );
+
+    const texteNormaliseB =
+        normaliserPourComparaison(
+            texteB
+        );
+
+    if (
+        texteNormaliseA
+        === texteNormaliseB
+    ) {
+
+        return true;
+
+    }
+
+    const longueurMaximale =
+        Math.max(
+            texteNormaliseA.length,
+            texteNormaliseB.length
+        );
+
+    /*
+     * Pour les textes très courts,
+     * une seule lettre différente peut
+     * complètement changer le mot.
+     */
+
+    if (
+        longueurMaximale < 8
+    ) {
+
+        return false;
+
+    }
+
+    const distance =
+        calculerDistanceLevenshtein(
+            texteNormaliseA,
+            texteNormaliseB
+        );
+
+    const distanceMaximale =
+        Math.max(
+            1,
+            Math.floor(
+                longueurMaximale
+                * 0.15
+            )
+        );
+
+    return distance
+        <= distanceMaximale;
+
+}
+
+
+function choisirGroupePrincipal(
+    groupes
+) {
+
+    let meilleurGroupe =
+        groupes[0];
+
+    let meilleurNombreOccurrences =
+        0;
+
+    groupes.forEach(
+        function (groupeTeste) {
+
+            const groupeTesteNormalise =
+                normaliserPourComparaison(
+                    groupeTeste
+                );
+
+            const nombreOccurrences =
+                groupes.filter(
+                    function (autreGroupe) {
+
+                        return normaliserPourComparaison(
+                            autreGroupe
+                        )
+                        === groupeTesteNormalise;
+
+                    }
+                ).length;
+
+            if (
+                nombreOccurrences
+                > meilleurNombreOccurrences
+            ) {
+
+                meilleurGroupe =
+                    groupeTeste;
+
+                meilleurNombreOccurrences =
+                    nombreOccurrences;
+
+                return;
+
+            }
+
+            /*
+             * En cas d’égalité, on préfère
+             * légèrement le groupe le plus court.
+             */
+
+            if (
+                nombreOccurrences
+                === meilleurNombreOccurrences
+                && groupeTeste.length
+                    < meilleurGroupe.length
+            ) {
+
+                meilleurGroupe =
+                    groupeTeste;
+
+            }
+
+        }
+    );
+
+    return meilleurGroupe;
+
+}
+
+
+function extraireGroupesParCaracteres(
+    texte,
+    nombreRepetitions
+) {
+
+    const texteCompact =
+        normaliserSansEspaces(
+            texte
+        );
+
+    if (
+        texteCompact.length
+        % nombreRepetitions
+        !== 0
+    ) {
+
+        return null;
+
+    }
+
+    const tailleGroupeCompacte =
+        texteCompact.length
+        / nombreRepetitions;
+
+    const groupes = [];
+
+    let debutGroupe =
+        0;
+
+    let nombreCaracteresUtiles =
+        0;
+
+    let numeroGroupe =
+        0;
+
+    for (
+        let index = 0;
+        index < texte.length;
+        index++
+    ) {
+
+        const caractereNormalise =
+            normaliserSansEspaces(
+                texte[index]
+            );
+
+        if (
+            caractereNormalise !== ""
+        ) {
+
+            nombreCaracteresUtiles +=
+                caractereNormalise.length;
+
+        }
+
+        if (
+            nombreCaracteresUtiles
+                >= tailleGroupeCompacte
+            && numeroGroupe
+                < nombreRepetitions - 1
+        ) {
+
+            const groupe =
+                texte
+                    .slice(
+                        debutGroupe,
+                        index + 1
+                    )
+                    .trim();
+
+            groupes.push(
+                groupe
+            );
+
+            debutGroupe =
+                index + 1;
+
+            nombreCaracteresUtiles =
+                0;
+
+            numeroGroupe++;
+
+        }
+
+    }
+
+    groupes.push(
+        texte
+            .slice(
+                debutGroupe
+            )
+            .trim()
+    );
+
+    if (
+        groupes.length
+        !== nombreRepetitions
+    ) {
+
+        return null;
+
+    }
+
+    return groupes;
+
+}
+
+
+function supprimerRepetitionAvecEspacesInternes(
+    texte
+) {
+
+    for (
+        let nombreRepetitions = 3;
+        nombreRepetitions >= 2;
+        nombreRepetitions--
+    ) {
+
+        const groupes =
+            extraireGroupesParCaracteres(
+                texte,
+                nombreRepetitions
+            );
+
+        if (
+            groupes === null
+        ) {
+
+            continue;
+
+        }
+
+        const groupesCompacts =
+            groupes.map(
+                function (groupe) {
+
+                    return normaliserSansEspaces(
+                        groupe
+                    );
+
+                }
+            );
+
+        const premierGroupeCompact =
+            groupesCompacts[0];
+
+        const groupesIdentiques =
+            groupesCompacts.every(
+                function (groupeCompact) {
+
+                    return groupeCompact
+                        === premierGroupeCompact;
+
+                }
+            );
+
+        if (
+            groupesIdentiques
+        ) {
+
+            /*
+             * On retourne la première version.
+             *
+             * Dans les imagiers, il s’agit
+             * généralement de l’écriture capitale,
+             * qui contient les espaces corrects.
+             */
+
+            return groupes[0];
+
+        }
+
+    }
+
+    return texte;
+
+}
+
+
 function supprimerRepetitionComplete(
     texte
 ) {
@@ -777,8 +1234,11 @@ function supprimerRepetitionComplete(
         texte.split(/\s+/);
 
     /*
-     * On teste si le texte est constitué
-     * de deux ou trois groupes identiques.
+     * Première méthode :
+     * groupes ayant le même nombre de mots.
+     *
+     * Elle permet notamment de reconnaître
+     * STEAK et STEACK comme presque identiques.
      */
 
     for (
@@ -801,24 +1261,10 @@ function supprimerRepetitionComplete(
             mots.length
             / nombreRepetitions;
 
-        const premierGroupe =
-            mots
-                .slice(
-                    0,
-                    tailleGroupe
-                )
-                .join(" ");
-
-        const premierGroupeNormalise =
-            normaliserPourComparaison(
-                premierGroupe
-            );
-
-        let groupesIdentiques =
-            true;
+        const groupes = [];
 
         for (
-            let numeroGroupe = 1;
+            let numeroGroupe = 0;
             numeroGroupe
                 < nombreRepetitions;
             numeroGroupe++
@@ -836,32 +1282,50 @@ function supprimerRepetitionComplete(
                     )
                     .join(" ");
 
-            if (
-                normaliserPourComparaison(
-                    groupe
-                )
-                !== premierGroupeNormalise
-            ) {
-
-                groupesIdentiques =
-                    false;
-
-                break;
-
-            }
+            groupes.push(
+                groupe
+            );
 
         }
 
+        const groupePrincipal =
+            choisirGroupePrincipal(
+                groupes
+            );
+
+        const groupesPresqueIdentiques =
+            groupes.every(
+                function (groupe) {
+
+                    return textesPresqueIdentiques(
+                        groupe,
+                        groupePrincipal
+                    );
+
+                }
+            );
+
         if (
-            groupesIdentiques
+            groupesPresqueIdentiques
         ) {
 
-            return premierGroupe;
+            return groupePrincipal;
 
         }
 
     }
 
-    return texte;
+    /*
+     * Deuxième méthode :
+     * on ignore les espaces placés au milieu
+     * des mots par certaines polices cursives.
+     *
+     * Exemple :
+     * UN CHIEN / UN CHI EN / UN CHIEN.
+     */
+
+    return supprimerRepetitionAvecEspacesInternes(
+        texte
+    );
 
 }
