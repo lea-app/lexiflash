@@ -794,11 +794,21 @@ function normaliserPourComparaison(
             /[\u0300-\u036f]/g,
             ""
         )
+
+        // Ignore quelques caractères parasites
+        // produits par certains OCR.
+        .replace(
+            /[²$|¦]/g,
+            ""
+        )
+
         .toLocaleLowerCase("fr-FR")
+
         .replace(
             /\s+/g,
             " "
         )
+
         .trim();
 
 }
@@ -942,25 +952,39 @@ function textesPresqueIdentiques(
             texteNormaliseB.length
         );
 
+    const distance =
+        calculerDistanceLevenshtein(
+            texteNormaliseA,
+            texteNormaliseB
+        );
+
     /*
      * Pour les textes très courts,
      * une seule lettre différente peut
      * complètement changer le mot.
+     *
+     * Exception :
+     * lorsqu’un caractère parasite OCR
+     * est présent dans le texte original,
+     * on accepte une seule différence.
      */
 
     if (
         longueurMaximale < 8
     ) {
 
-        return false;
+        const contientCaractereParasite =
+            /[²$|¦]/.test(
+                texteA
+            )
+            || /[²$|¦]/.test(
+                texteB
+            );
+
+        return contientCaractereParasite
+            && distance <= 1;
 
     }
-
-    const distance =
-        calculerDistanceLevenshtein(
-            texteNormaliseA,
-            texteNormaliseB
-        );
 
     const distanceMaximale =
         Math.max(
@@ -975,7 +999,6 @@ function textesPresqueIdentiques(
         <= distanceMaximale;
 
 }
-
 
 function choisirGroupePrincipal(
     groupes
