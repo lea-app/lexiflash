@@ -35,6 +35,10 @@ export function creerCarte(
             informations.cachee
             ?? false,
 
+        episode:
+             informations.episode
+            ?? null,
+
         difficulte:
             informations.difficulte
             ?? 1,

@@ -53,6 +53,9 @@ export const boutonFavori =
 export const modeLecture =
     document.getElementById("modeLecture");
 
+export const selectionEpisodes =
+    document.getElementById("selectionEpisodes");
+
 export const modeAffichage =
     document.getElementById("modeAffichage");
 

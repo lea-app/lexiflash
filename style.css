@@ -139,11 +139,14 @@ button:disabled {
 }
 
 .options-lecture {
+    width: 100%;
+
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
+
+    flex-wrap: nowrap;
+    gap: 7px;
 
     font-size: 13px;
 }
@@ -152,13 +155,77 @@ button:disabled {
     display: flex;
     align-items: center;
     gap: 4px;
+
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 #modeLecture {
-    min-width: 190px;
+    width: 160px;
+    min-width: 0;
     height: 30px;
 
+    flex-shrink: 0;
+
     font-size: 13px;
+}
+
+.selection-episodes {
+    min-width: 0;
+    max-width: 310px;
+
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    padding: 5px 8px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    background-color: #f3f7f3;
+    border: 1px solid #d7e4d7;
+    border-radius: 8px;
+
+    white-space: nowrap;
+}
+
+.selection-episodes > span {
+    flex-shrink: 0;
+    font-weight: bold;
+}
+
+.choix-episode {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+
+    flex-shrink: 0;
+
+    padding: 0 1px;
+    cursor: pointer;
+}
+
+.choix-episode input {
+    margin: 0;
+    cursor: pointer;
+}
+
+.groupe-affichage {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+#modeAffichage {
+    width: 135px;
+}
+
+#modeEcriture {
+    width: 90px;
 }
 
 
@@ -215,7 +282,7 @@ button:disabled {
 .bouton-corpus {
     width: 100%;
     min-width: 0;
-    padding: 9px 50px 9px 12px;
+    padding: 9px 105px 9px 12px;
 
     display: grid;
     grid-template-columns: auto auto auto;
@@ -269,7 +336,7 @@ button:disabled {
     right: 8px;
 
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 4px;
 
     transform: translateY(-50%);
@@ -280,6 +347,7 @@ button:disabled {
 }
 
 .renommer-corpus,
+.episodes-corpus,
 .supprimer-corpus {
     width: 26px;
     height: 26px;
@@ -302,6 +370,14 @@ button:disabled {
 
 .renommer-corpus:hover {
     background-color: #dddddd;
+}
+
+.episodes-corpus {
+    background-color: #e8f0e8;
+}
+
+.episodes-corpus:hover {
+    background-color: #dce8dc;
 }
 
 .supprimer-corpus {
@@ -507,6 +583,114 @@ button:disabled {
     }
 
     
+}
+
+/* ==============================
+   MODALE DES ÉPISODES
+   ============================== */
+
+.fond-modale-episodes {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+
+    background-color: rgba(0, 0, 0, 0.45);
+}
+
+.modale-episodes {
+    width: min(600px, 100%);
+    padding: 24px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    background-color: white;
+    border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+
+    text-align: left;
+}
+
+.modale-episodes h2 {
+    margin: 0;
+
+    color: green;
+    text-align: center;
+}
+
+.modale-episodes p {
+    margin: 0;
+
+    color: #666;
+    text-align: center;
+}
+
+.modale-episodes label {
+    font-weight: bold;
+}
+
+.modale-episodes input[type="number"] {
+    width: 100%;
+    padding: 10px;
+
+    border: 1px solid #cccccc;
+    border-radius: 7px;
+
+    font-size: 16px;
+}
+
+.boutons-modale-episodes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+
+    margin-top: 6px;
+}
+
+.boutons-modale-episodes button {
+    padding: 9px 14px;
+
+    font-size: 14px;
+}
+
+.boutons-modale-episodes button:last-child {
+    background-color: green;
+    color: white;
+}
+.liste-mots-episodes {
+    max-height: 55vh;
+    overflow-y: auto;
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 16px;
+
+    padding: 8px;
+
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+}
+
+.mot-episode {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 6px 8px;
+
+    font-size: 16px;
+    font-weight: normal;
+}
+
+.mot-episode input {
+    flex-shrink: 0;
 }
 
 /* ==============================

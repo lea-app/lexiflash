@@ -13,10 +13,80 @@ import {
 
 import {
     caseMelanger,
+    selectionEpisodes,
     motSuivant,
     motPrecedent,
     recommencer
 } from "./dom.js";
+
+
+// ==============================
+// ÉPISODES SÉLECTIONNÉS
+// ==============================
+
+function obtenirEpisodesSelectionnes() {
+
+    const nombreEpisodes =
+        application.corpusActuel.nombreEpisodes ?? 0;
+
+
+    // Corpus sans épisodes
+
+    if (
+        nombreEpisodes < 1
+    ) {
+
+        return null;
+
+    }
+
+
+    const casesCochees =
+        selectionEpisodes.querySelectorAll(
+            'input[type="checkbox"]:checked'
+        );
+
+
+    return Array.from(
+        casesCochees
+    ).map(
+        function (caseEpisode) {
+
+            return Number(
+                caseEpisode.value
+            );
+
+        }
+    );
+
+}
+
+
+// ==============================
+// CARTE DANS UN ÉPISODE SÉLECTIONNÉ
+// ==============================
+
+function carteDansEpisodeSelectionne(
+    carte,
+    episodesSelectionnes
+) {
+
+    // Pas d'épisodes dans ce corpus
+
+    if (
+        episodesSelectionnes === null
+    ) {
+
+        return true;
+
+    }
+
+
+    return episodesSelectionnes.includes(
+        carte.episode
+    );
+
+}
 
 
 // ==============================
@@ -28,8 +98,11 @@ function construireListeLecture() {
     const modeLecture =
         application.preferences.modeLecture;
 
+    const episodesSelectionnes =
+        obtenirEpisodesSelectionnes();
 
-    // Cartes visibles du corpus actuel
+
+    // Tout le corpus
 
     if (
         modeLecture === "toutes"
@@ -38,7 +111,14 @@ function construireListeLecture() {
         return application.corpusActuel.cartes.filter(
             function (carte) {
 
-                return !carte.cachee;
+                return (
+                    !carte.cachee
+                    &&
+                    carteDansEpisodeSelectionne(
+                        carte,
+                        episodesSelectionnes
+                    )
+                );
 
             }
         );
@@ -46,7 +126,7 @@ function construireListeLecture() {
     }
 
 
-    // Favoris visibles du corpus actuel
+    // Favoris du corpus actuel
 
     if (
         modeLecture === "favorisCorpus"
@@ -56,8 +136,14 @@ function construireListeLecture() {
             function (carte) {
 
                 return (
-                    carte.favori &&
+                    carte.favori
+                    &&
                     !carte.cachee
+                    &&
+                    carteDansEpisodeSelectionne(
+                        carte,
+                        episodesSelectionnes
+                    )
                 );
 
             }
@@ -79,7 +165,8 @@ function construireListeLecture() {
                     function (carte) {
 
                         return (
-                            carte.favori &&
+                            carte.favori
+                            &&
                             !carte.cachee
                         );
 
@@ -101,7 +188,14 @@ function construireListeLecture() {
         return application.corpusActuel.cartes.filter(
             function (carte) {
 
-                return carte.cachee;
+                return (
+                    carte.cachee
+                    &&
+                    carteDansEpisodeSelectionne(
+                        carte,
+                        episodesSelectionnes
+                    )
+                );
 
             }
         );
@@ -114,7 +208,14 @@ function construireListeLecture() {
     return application.corpusActuel.cartes.filter(
         function (carte) {
 
-            return !carte.cachee;
+            return (
+                !carte.cachee
+                &&
+                carteDansEpisodeSelectionne(
+                    carte,
+                    episodesSelectionnes
+                )
+            );
 
         }
     );
@@ -162,13 +263,36 @@ function obtenirMessageListeVide() {
     const modeLecture =
         application.preferences.modeLecture;
 
+    const nombreEpisodes =
+        application.corpusActuel.nombreEpisodes ?? 0;
+
+    const episodesSelectionnes =
+        obtenirEpisodesSelectionnes();
+
+
+    // Aucun épisode coché
+
+    if (
+        nombreEpisodes > 0
+        &&
+        episodesSelectionnes.length === 0
+        &&
+        modeLecture !== "favorisBibliotheque"
+    ) {
+
+        return "Sélectionne au moins un épisode";
+
+    }
+
+
     if (
         modeLecture === "favorisCorpus"
     ) {
 
-        return "⭐ Aucun favori visible dans ce corpus";
+        return "⭐ Aucun favori dans les épisodes sélectionnés";
 
     }
+
 
     if (
         modeLecture === "favorisBibliotheque"
@@ -178,15 +302,17 @@ function obtenirMessageListeVide() {
 
     }
 
+
     if (
         modeLecture === "cartesMasquees"
     ) {
 
-        return "🙈 Aucune carte masquée dans ce corpus";
+        return "🙈 Aucune carte masquée dans les épisodes sélectionnés";
 
     }
 
-    return "Aucune carte visible dans ce corpus";
+
+    return "Aucune carte visible dans les épisodes sélectionnés";
 
 }
 
@@ -205,8 +331,10 @@ export function demarrerCorpus() {
 
     }
 
+
     application.mots =
         construireListeLecture();
+
 
     if (
         caseMelanger.checked
@@ -215,6 +343,7 @@ export function demarrerCorpus() {
         melangerMots();
 
     }
+
 
     application.position =
         0;

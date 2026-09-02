@@ -15,6 +15,7 @@ export function creerElementCorpus(
     corpus,
     selectionner,
     renommer,
+    organiserEpisodes,
     supprimer
 ) {
 
@@ -212,6 +213,39 @@ boutonRenommage.setAttribute(
     );
 
 
+   // ---------- organiser les épisodes ----------
+
+const boutonEpisodes =
+    document.createElement("button");
+
+boutonEpisodes.type =
+    "button";
+
+boutonEpisodes.className =
+    "episodes-corpus";
+
+boutonEpisodes.textContent =
+    "🎬";
+
+boutonEpisodes.title =
+    "Organiser les épisodes";
+
+boutonEpisodes.setAttribute(
+    "aria-label",
+    "Organiser les épisodes"
+);
+
+boutonEpisodes.addEventListener(
+    "click",
+    function () {
+
+        organiserEpisodes(
+            corpus
+        );
+
+    }
+);
+
     // ---------- supprimer ----------
 
     const boutonSuppression =
@@ -246,14 +280,17 @@ boutonSuppression.setAttribute(
     );
 
 
-    zoneActions.appendChild(
-        boutonRenommage
-    );
+zoneActions.appendChild(
+    boutonRenommage
+);
 
-    zoneActions.appendChild(
-        boutonSuppression
-    );
+zoneActions.appendChild(
+    boutonEpisodes
+);
 
+zoneActions.appendChild(
+    boutonSuppression
+);
 
     // ==============================
     // ASSEMBLAGE

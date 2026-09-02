@@ -24,6 +24,10 @@ import {
 } from "./elementCorpus.js";
 
 import {
+    organiserEpisodes
+} from "./episodes.js";
+
+import {
     sauvegarderCorpus,
     supprimerCorpusSauvegarde
 } from "./baseDonnees.js";
@@ -142,7 +146,6 @@ async function demanderRenommage(
     afficherBibliotheque();
 
 }
-
 
 // ==============================
 // DEMANDE DE SUPPRESSION
@@ -271,11 +274,12 @@ export function afficherBibliotheque() {
 
             const elementCorpus =
                 creerElementCorpus(
-                    corpus,
-                    ouvrirCorpus,
-                    demanderRenommage,
-                    demanderSuppression
-                );
+                 corpus,
+                 ouvrirCorpus,
+                demanderRenommage,
+                organiserEpisodes,
+             demanderSuppression
+            );
 
             listeCorpus.appendChild(
                 elementCorpus
