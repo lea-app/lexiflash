@@ -299,9 +299,40 @@ function afficherEpisode(
         "liste-mots-episodes";
 
 
-    corpus.cartes.forEach(
-        function (carte) {
+const cartesTriees =
+    [...corpus.cartes].sort(
+        function (carteA, carteB) {
 
+            function motSansDeterminant(texte) {
+
+                return texte
+                    .trim()
+                    .replace(
+                        /^(le|la|les|l['’]|un|une|des|du|de la|de l['’])\s*/i,
+                        ""
+                    );
+
+            }
+
+            return motSansDeterminant(
+                carteA.texte
+            ).localeCompare(
+                motSansDeterminant(
+                    carteB.texte
+                ),
+                "fr",
+                {
+                    sensitivity: "base"
+                }
+            );
+
+        }
+    );
+
+
+cartesTriees.forEach(
+    function (carte) {
+        
             const episodeActuel =
                 attribution.get(
                     carte.id
